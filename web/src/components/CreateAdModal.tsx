@@ -1,44 +1,15 @@
 import * as Checkbox from '@radix-ui/react-checkbox'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
+import axios from 'axios'
 
 import { Check, GameController } from 'phosphor-react'
 import { FormEvent, useEffect, useState } from 'react'
 import { IGameData } from '../@types'
+import { WEEKDAYS } from '../constants'
 import { Input } from './Form/Input'
 
 type ModalGame<T extends IGameData> = Omit<T, 'bannerUrl' | '_count'>
-
-const WEEKDAYS = [
-  {
-    value: 0,
-    title: 'D'
-  },
-  {
-    value: 1,
-    title: 'S'
-  },
-  {
-    value: 2,
-    title: 'T'
-  },
-  {
-    value: 3,
-    title: 'Q'
-  },
-  {
-    value: 4,
-    title: 'Q'
-  },
-  {
-    value: 5,
-    title: 'S'
-  },
-  {
-    value: 6,
-    title: 'S'
-  }
-]
 
 export const CreateAdModal = () => {
   const [games, setGames] = useState<ModalGame<IGameData>[]>([])
@@ -46,20 +17,29 @@ export const CreateAdModal = () => {
   const [useVoiceChannel, setUseVoiceChannel] = useState(false)
 
   useEffect(() => {
-    fetch('http://localhost:3333/games')
-      .then(response => response.json())
-      .then(res => setGames(res))
+    axios('http://localhost:3333/games')
+      .then(res => setGames(res.data))
   }, [])
 
-  const handleCreateAd = (e: FormEvent) => {
+  const handleCreateAd = async (e: FormEvent) => {
     e.preventDefault()
 
     const formData = new FormData(e.target as HTMLFormElement)
     const data = Object.fromEntries(formData)
 
-    console.log(data)
-    console.log(formData)
-    console.log(useVoiceChannel)
+    try {
+      axios.post(`http://localhost:3333/games/${data.game}/ads`, {
+        name: data.name,
+        yearsPlaying: Number(data.yearsPlaying),
+        discord: data.discord,
+        weekDays: selectedWeekDays.map(Number),
+        hoursStart: data.hoursStart,
+        hoursEnd: data.hoursEnd,
+        useVoiceChannel
+      })
+    } catch (error) {
+
+    }
   }
 
   return (

@@ -9,15 +9,15 @@ import { GamerBanner } from './components/GamerBanner'
 import { IGameData } from './@types'
 import logoImg from './assets/logo-nlw-esports.svg'
 
+import axios from 'axios'
 import './styles/main.css'
 
 export const App = () => {
   const [games, setGames] = useState<IGameData[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:3333/games')
-      .then(response => response.json())
-      .then(res => setGames(res))
+    axios('http://localhost:3333/games')
+      .then(res => setGames(res.data))
   }, [])
 
   return (
