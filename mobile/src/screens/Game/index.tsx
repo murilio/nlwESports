@@ -9,22 +9,30 @@ import logoImg from '../../assets/logo-nlw-esports.png'
 
 import { useEffect, useState } from 'react'
 import { DuoCard, DuoCardProps } from '../../components/DuoCard'
+import { DuoMatch } from '../../components/DuoMacth'
 import { Header } from '../../components/Header'
 import { THEME } from "../../theme"
 import { styles } from "./styles"
 
 export const Game = () => {
   const [duos, setDuos] = useState<DuoCardProps[]>([])
+  const [discordDuoSelected, setDiscordDuoSelected] = useState('')
+
   const navigation = useNavigation()
   const route = useRoute()
   const game = route.params as RouteGameProps
 
   useEffect(() => {
-    fetch(`http://10.0.0.108:3333/games/${game.id}/ads`)
+    fetch(`http://192.168.0.104:3333/games/${game.id}/ads`)
       .then((response) => response.json())
       .then((res) => setDuos(res))
   }, [])
 
+  const handleGetDiscordUser = async (adsId: string) => {
+    fetch(`http://192.168.0.104:3333/ads/${adsId}/discord`)
+      .then((response) => response.json())
+      .then((res) => setDiscordDuoSelected(res.discord))
+  }
 
   const handleBackPage = () => {
     navigation.goBack()
@@ -67,7 +75,7 @@ export const Game = () => {
           renderItem={({ item }) => (
             <DuoCard
               data={item}
-              onConnect={() => { }}
+              onConnect={() => handleGetDiscordUser(item.id)}
             />
           )}
           horizontal
@@ -77,6 +85,13 @@ export const Game = () => {
           ListEmptyComponent={() => (
             <Text style={styles.emptyListText}>Não há anúncios publicado ainda.</Text>
           )}
+        />
+
+        <DuoMatch
+          visible={discordDuoSelected.length > 0}
+          discord={discordDuoSelected}
+          onClose={async () => setDiscordDuoSelected('')}
+
         />
       </SafeAreaView>
     </Background>
